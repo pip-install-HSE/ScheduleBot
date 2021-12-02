@@ -1,5 +1,5 @@
 from openpyxl import Workbook
-import random
+
 
 
 def alg1(stafftmp, staffdatatmp, slotstmp, sh1tmp):
@@ -35,7 +35,7 @@ def alg1(stafftmp, staffdatatmp, slotstmp, sh1tmp):
             l = [i,'-','-']
         sh1tmp.append(l)
 
-    sh1tmp.append(smeni)
+    #sh1tmp.append(smeni)
 
 def alg2(stafftmp, staffdatatmp, slotstmp, sh1tmp):
     smeni = []
@@ -67,7 +67,7 @@ def alg2(stafftmp, staffdatatmp, slotstmp, sh1tmp):
             l = [i, '-', '-']
         sh1tmp.append(l)
 
-    sh1tmp.append(smeni)
+    #sh1tmp.append(smeni)
 
 
 wb = Workbook()
@@ -79,29 +79,22 @@ sh1 = wb.active
 sh2 = wb2.active
 print("Enter the number of staff")
 staff = int(input()) #количество человек
-#print("Enter the number of threads")
 threads = 2 #int(input()) #количество потоков(пока не использовал)
 slots = 28 #слоты
 staffdata = [] #список для каджого человека
 firstline = [staff, threads]
-sh1.append(firstline)
-sh2.append(firstline)
-#for i in range(0, staff):
-    #tmp = []
-    #for j in range(0, slots):
-        #tmp.append(random.randint(0, 2))
 
-    #staffdata.append(tmp)
-    #sh1.append(tmp)
-    #sh2.append(tmp)
 for i in range(0,staff):
     print("Enter ",i+1," staff")
     tmp = []
-    tmp = input().split()
+    tmp = input()
+    tmp2= []
     if len(tmp)!=28:
         print("You should enter 28 slots for ",i+1," staff")
         break
-    staffdata.append(tmp)
+    for j in range(0,slots):
+        tmp2.append(int(tmp[j]))
+    staffdata.append(tmp2)
 
 
 alg1(staff,staffdata,slots,sh1)

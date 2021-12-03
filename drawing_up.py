@@ -79,7 +79,7 @@ sh1 = wb.active
 sh2 = wb2.active
 print("Enter the number of staff")
 staff = int(input()) #количество человек
-threads = 2 #int(input()) #количество потоков(пока не использовал)
+threads = 6 #int(input()) #количество потоков(пока не использовал)
 slots = 28 #слоты
 staffdata = [] #список для каджого человека
 firstline = [staff, threads]

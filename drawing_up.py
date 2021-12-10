@@ -1,6 +1,8 @@
 from openpyxl import Workbook
+from slots_sort import sort_slots
 
 
+max_slots_together = 2
 
 def alg1(stafftmp, staffdatatmp, slotstmp, sh1tmp):
     smeni = []
@@ -69,35 +71,89 @@ def alg2(stafftmp, staffdatatmp, slotstmp, sh1tmp):
 
     #sh1tmp.append(smeni)
 
+if __name__ == '__main__':
+    staff_number, threads_number = map(int, input().split())
+    staff_schedule, staff_load, staff_threads = [], [], []
 
-wb = Workbook()
+    for num in range(1, staff_number + 1):
+        print(f"Enter {num} staff schedule and max: ", end='')
+        staff_line, staff_max_load, staff_max_threads = input().split()
+        staff_schedule.append(list(map(int, list(staff_line))))
+        staff_load.append(int(staff_max_load))
+        staff_threads.append(int(staff_max_threads))
+        assert len(staff_schedule[-1]) == 28
+    # print(staff_schedule)
+    # print(staff_number)
+    # print(threads_number)
+    workbook = Workbook()
+    worksheet = workbook.active
 
-wb["Sheet"].title = "Schedule"
-wb2 = Workbook()
-wb2["Sheet"].title = "Schedule2"
-sh1 = wb.active
-sh2 = wb2.active
-print("Enter the number of staff")
-staff = int(input()) #количество человек
-threads = 6 #int(input()) #количество потоков(пока не использовал)
-slots = 28 #слоты
-staffdata = [] #список для каджого человека
-firstline = [staff, threads]
+    for i in range(28):
+        worksheet.cell(row=i+2, column=1).value = f"Смена {i+1}"
+    for i in range(threads_number):
+        worksheet.cell(row=1, column=i+2).value = f"Поток {i+1}"
 
-for i in range(0,staff):
-    print("Enter ",i+1," staff")
-    tmp = []
-    tmp = input()
-    tmp2= []
-    if len(tmp)!=28:
-        print("You should enter 28 slots for ",i+1," staff")
-        break
-    for j in range(0,slots):
-        tmp2.append(int(tmp[j]))
-    staffdata.append(tmp2)
+    list_slots = sort_slots(staff_schedule)
+    staff_sum = [0 for _ in range(staff_number)]
+    threads_sum = [0 for _ in range(threads_number)]
+    for slot in list_slots:
+        staff_1 = []
+        staff_2 = []
+        for staff in range(staff_number):
+            if staff_schedule[staff][slot] == 1:
+                for _ in range(staff_threads[staff]):
+                    staff_1.append(staff)
+            if staff_schedule[staff][slot] == 2:
+                for _ in range(staff_threads[staff]):
+                    staff_2.append(staff)
+
+        staff_1 = sorted(staff_1, key=lambda staff: staff_sum[staff])
+        staff_2 = sorted(staff_2, key=lambda staff: staff_sum[staff])
+        staff_priority = staff_2 + staff_1
+        staff_priority = list(filter(lambda staff: staff_sum[staff] < staff_load[staff], staff_priority))
+        threads_priority = list(range(threads_number))
+        threads_priority = sorted(threads_priority, key=lambda thread: threads_sum[thread])
+
+        for i, thread in enumerate(threads_priority):
+            if i >= len(staff_priority):
+                break
+            staff = staff_priority[i]
+            worksheet.cell(row=slot+2, column=thread+2).value = f" Сотрудник {staff+1}"
+            staff_sum[staff] += 1
+            threads_sum[thread] += 1
+        print(staff_sum)
+
+    workbook.save("result.xlsx")
 
 
-alg1(staff,staffdata,slots,sh1)
-alg2(staff,staffdata,slots,sh2)
-wb.save("Schedule.xlsx")
-wb2.save("Schedule2.xlsx")
+# wb = Workbook()
+#
+# wb["Sheet"].title = "Schedule"
+# wb2 = Workbook()
+# wb2["Sheet"].title = "Schedule2"
+# sh1 = wb.active
+# sh2 = wb2.active
+# print("Enter the number of staff")
+# staff = int(input()) #количество человек
+# threads = 6 #int(input()) #количество потоков(пока не использовал)
+# slots = 28 #слоты
+# staffdata = [] #список для каджого человека
+# firstline = [staff, threads]
+#
+# for i in range(0,staff):
+#     print("Enter ",i+1," staff")
+#     tmp = []
+#     tmp = input()
+#     tmp2= []
+#     if len(tmp)!=28:
+#         print("You should enter 28 slots for ",i+1," staff")
+#         break
+#     for j in range(0,slots):
+#         tmp2.append(int(tmp[j]))
+#     staffdata.append(tmp2)
+#
+#
+# alg1(staff,staffdata,slots,sh1)
+# alg2(staff,staffdata,slots,sh2)
+# wb.save("Schedule.xlsx")
+# wb2.save("Schedule2.xlsx")

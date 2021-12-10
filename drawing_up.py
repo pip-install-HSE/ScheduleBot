@@ -2,8 +2,6 @@ from openpyxl import Workbook
 from slots_sort import sort_slots
 
 
-max_slots_together = 2
-
 def alg1(stafftmp, staffdatatmp, slotstmp, sh1tmp):
     smeni = []
     for i in range(0,staff):
@@ -95,22 +93,37 @@ if __name__ == '__main__':
 
     list_slots = sort_slots(staff_schedule)
     staff_sum = [0 for _ in range(staff_number)]
+    staff_slots = [[] for _ in range(staff_number)]
     threads_sum = [0 for _ in range(threads_number)]
     for slot in list_slots:
         staff_1 = []
         staff_2 = []
         for staff in range(staff_number):
             if staff_schedule[staff][slot] == 1:
-                for _ in range(staff_threads[staff]):
-                    staff_1.append(staff)
+                staff_1.append(staff)
             if staff_schedule[staff][slot] == 2:
-                for _ in range(staff_threads[staff]):
-                    staff_2.append(staff)
-
+                staff_2.append(staff)
         staff_1 = sorted(staff_1, key=lambda staff: staff_sum[staff])
         staff_2 = sorted(staff_2, key=lambda staff: staff_sum[staff])
+        for staff in staff_1:
+            for _ in range(staff_threads[staff] - 1):
+                staff_1.append(staff)
+        for staff in staff_2:
+            for _ in range(staff_threads[staff] - 1):
+                staff_2.append(staff)
         staff_priority = staff_2 + staff_1
         staff_priority = list(filter(lambda staff: staff_sum[staff] < staff_load[staff], staff_priority))
+        print(staff_priority)
+        staff_priority = list(
+            filter(lambda staff: not ((slot - 1) in staff_slots[staff] and (slot - 2) in staff_slots[staff]),
+                   staff_priority))
+        staff_priority = list(
+            filter(lambda staff: not ((slot + 1) in staff_slots[staff] and (slot + 2) in staff_slots[staff]),
+                   staff_priority))
+        staff_priority = list(
+            filter(lambda staff: not ((slot - 1) in staff_slots[staff] and (slot + 1) in staff_slots[staff]),
+                   staff_priority))
+        print(staff_priority)
         threads_priority = list(range(threads_number))
         threads_priority = sorted(threads_priority, key=lambda thread: threads_sum[thread])
 
@@ -120,6 +133,7 @@ if __name__ == '__main__':
             staff = staff_priority[i]
             worksheet.cell(row=slot+2, column=thread+2).value = f" Сотрудник {staff+1}"
             staff_sum[staff] += 1
+            staff_slots[staff].append(slot)
             threads_sum[thread] += 1
         print(staff_sum)
 

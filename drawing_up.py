@@ -79,7 +79,7 @@ def func(thread_name, staff_priority, staff_flows):
 if __name__ == '__main__':
     staff_schedule, staff_load, staff_threads, thread_names, staff_flows = [], [], [], [], []
     staff_number, threads_number = map(int, input().split())
-    thread_names = input().split(", ")
+    thread_names = re.sub(r'\s*','',input()).split(',')
     print(thread_names)
     for num in range(1, staff_number + 1):
         print(f"Enter {num} staff schedule and max: ", end='')

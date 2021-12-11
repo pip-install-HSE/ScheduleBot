@@ -125,17 +125,25 @@ if __name__ == '__main__':
                 staff_2.append(staff)
         staff_priority = staff_2 + staff_1
         staff_priority = list(filter(lambda staff: staff_sum[staff] < staff_load[staff], staff_priority))
-        print(staff_priority)
+        #print(staff_priority)
         staff_priority = list(
             filter(lambda staff: not ((slot - 1) in staff_slots[staff] and (slot - 2) in staff_slots[staff]),
-                   staff_priority))
+                staff_priority))
         staff_priority = list(
             filter(lambda staff: not ((slot + 1) in staff_slots[staff] and (slot + 2) in staff_slots[staff]),
-                   staff_priority))
+                 staff_priority))
         staff_priority = list(
             filter(lambda staff: not ((slot - 1) in staff_slots[staff] and (slot + 1) in staff_slots[staff]),
-                   staff_priority))
-        print(staff_priority)
+                staff_priority))
+        if slot % 4 == 0:
+            staff_priority = list(
+                filter(lambda staff: not ((slot + 1) in staff_slots[staff]),
+                        staff_priority))
+        if slot % 4 == 1:
+            staff_priority = list(
+                filter(lambda staff: not ((slot - 1) in staff_slots[staff]),
+                       staff_priority))
+        #print(staff_priority)
         threads_priority = list(range(threads_number))
         threads_priority = sorted(threads_priority, key=lambda thread: threads_sum[thread])
         threads_priority = sorted(threads_priority, key=lambda thread: func(thread_names[thread], set(staff_priority), staff_flows))

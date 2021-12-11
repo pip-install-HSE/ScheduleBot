@@ -1,6 +1,6 @@
 from openpyxl import Workbook
 from slots_sort import sort_slots
-
+import re
 
 def alg1(stafftmp, staffdatatmp, slotstmp, sh1tmp):
     smeni = []
@@ -69,18 +69,30 @@ def alg2(stafftmp, staffdatatmp, slotstmp, sh1tmp):
 
     #sh1tmp.append(smeni)
 
-if __name__ == '__main__':
-    staff_number, threads_number = map(int, input().split())
-    staff_schedule, staff_load, staff_threads = [], [], []
+def func(thread_name, staff_priority, staff_flows):
+    result = 0
+    for staff in staff_priority:
+        if thread_name in staff_flows[staff]:
+            result += 1
+    return result
 
+if __name__ == '__main__':
+    staff_schedule, staff_load, staff_threads, thread_names, staff_flows = [], [], [], [], []
+    staff_number, threads_number = map(int, input().split())
+    thread_names = input().split(", ")
+    print(thread_names)
     for num in range(1, staff_number + 1):
         print(f"Enter {num} staff schedule and max: ", end='')
-        staff_line, staff_max_load, staff_max_threads = input().split()
+        line = input()
+        line = re.sub(r'\s*,\s*', ',', line)
+        staff_line, staff_max_load, staff_max_threads, staff_flows_str = line.split()
         staff_schedule.append(list(map(int, list(staff_line))))
         staff_load.append(int(staff_max_load))
         staff_threads.append(int(staff_max_threads))
+        staff_flows.append(staff_flows_str.split(','))
         assert len(staff_schedule[-1]) == 28
     # print(staff_schedule)
+    print(staff_flows)
     # print(staff_number)
     # print(threads_number)
     workbook = Workbook()
@@ -89,7 +101,7 @@ if __name__ == '__main__':
     for i in range(28):
         worksheet.cell(row=i+2, column=1).value = f"Смена {i+1}"
     for i in range(threads_number):
-        worksheet.cell(row=1, column=i+2).value = f"Поток {i+1}"
+        worksheet.cell(row=1, column=i+2).value = thread_names[i]
 
     list_slots = sort_slots(staff_schedule)
     staff_sum = [0 for _ in range(staff_number)]
@@ -105,10 +117,10 @@ if __name__ == '__main__':
                 staff_2.append(staff)
         staff_1 = sorted(staff_1, key=lambda staff: staff_sum[staff])
         staff_2 = sorted(staff_2, key=lambda staff: staff_sum[staff])
-        for staff in staff_1:
+        for staff in staff_1.copy():
             for _ in range(staff_threads[staff] - 1):
                 staff_1.append(staff)
-        for staff in staff_2:
+        for staff in staff_2.copy():
             for _ in range(staff_threads[staff] - 1):
                 staff_2.append(staff)
         staff_priority = staff_2 + staff_1
@@ -126,15 +138,19 @@ if __name__ == '__main__':
         print(staff_priority)
         threads_priority = list(range(threads_number))
         threads_priority = sorted(threads_priority, key=lambda thread: threads_sum[thread])
-
-        for i, thread in enumerate(threads_priority):
-            if i >= len(staff_priority):
-                break
-            staff = staff_priority[i]
-            worksheet.cell(row=slot+2, column=thread+2).value = f" Сотрудник {staff+1}"
-            staff_sum[staff] += 1
-            staff_slots[staff].append(slot)
-            threads_sum[thread] += 1
+        threads_priority = sorted(threads_priority, key=lambda thread: func(thread_names[thread], set(staff_priority), staff_flows))
+        for thread in threads_priority:
+            staff = None
+            for i, staff_x in enumerate(staff_priority):
+                if thread_names[thread] in staff_flows[staff_x]:
+                    staff = staff_x
+                    staff_priority.pop(i)
+                    break
+            if staff is not None:
+                worksheet.cell(row=slot+2, column=thread+2).value = f" Сотрудник {staff+1}"
+                staff_sum[staff] += 1
+                staff_slots[staff].append(slot)
+                threads_sum[thread] += 1
         print(staff_sum)
 
     workbook.save("result.xlsx")

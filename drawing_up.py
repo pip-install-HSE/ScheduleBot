@@ -80,12 +80,16 @@ if __name__ == '__main__':
     staff_schedule, staff_load, staff_threads, thread_names, staff_flows = [], [], [], [], []
     staff_number, threads_number = map(int, input().split())
     thread_names = re.sub(r'\s*','',input()).split(',')
+    input()
+    staff_names = []
     print(thread_names)
     for num in range(1, staff_number + 1):
         print(f"Enter {num} staff schedule and max: ", end='')
         line = input()
         line = re.sub(r'\s*,\s*', ',', line)
-        staff_line, staff_max_load, staff_max_threads, staff_flows_str = line.split()
+        staff_name, staff_line, staff_max_load, staff_max_threads, \
+        staff_flows_str = line.split()
+        staff_names.append(staff_name)
         staff_schedule.append(list(map(int, list(staff_line))))
         staff_load.append(int(staff_max_load))
         staff_threads.append(int(staff_max_threads))
@@ -155,7 +159,9 @@ if __name__ == '__main__':
                     staff_priority.pop(i)
                     break
             if staff is not None:
-                worksheet.cell(row=slot+2, column=thread+2).value = f" Сотрудник {staff+1}"
+                # worksheet.cell(row=slot+2, column=thread+2).value = f" Сотрудник {staff+1}"
+                worksheet.cell(row=slot + 2,
+                               column=thread + 2).value = staff_names[staff]
                 staff_sum[staff] += 1
                 staff_slots[staff].append(slot)
                 threads_sum[thread] += 1
